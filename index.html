@@ -62,7 +62,7 @@ body{font-family:'Sarabun',sans-serif;background:#F5F6FA;color:#1a1d2e;font-size
 .student-list{display:flex;flex-direction:column;gap:8px}
 .student-row{background:#fff;border:1px solid #E5E7EF;border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .15s}
 .student-row:hover{border-color:#378ADD;box-shadow:0 2px 10px rgba(55,138,221,0.1)}
-.student-badge{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.student-badge{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
 .badge-green{background:#E8F8F2;color:#1D9E75}
 .badge-amber{background:#FEF6E4;color:#D4900A}
 .badge-red{background:#FEF0EF;color:#E24B4A}
@@ -273,9 +273,11 @@ function calcStats(d) {
 
 function studentBadge(s) {
   const pct = s.total ? Math.round(s.submitted/s.total*100) : 0;
-  if (pct>=80) return {cls:'badge-green', label: s.name.substring(0,2)};
-  if (pct>=40) return {cls:'badge-amber', label: s.name.substring(0,2)};
-  return {cls:'badge-red', label: s.name.substring(0,2)};
+  const isBoy = s.fullName.startsWith('ด.ช.');
+  const emoji = isBoy ? '👦' : '👧';
+  if (pct>=80) return {cls:'badge-green', label: emoji};
+  if (pct>=40) return {cls:'badge-amber', label: emoji};
+  return {cls:'badge-red', label: emoji};
 }
 
 function missingBadgeClass(missing) {
@@ -324,10 +326,10 @@ function renderOverview() {
   const avg = Math.round((s4.rate+s6.rate)/2);
   const html = `
     <div class="stats">
-      <div class="stat-card blue"><div class="stat-label">นักเรียนทั้งหมด</div><div class="stat-value">${s4.count+s6.count}</div><div class="stat-sub">ป.4: ${s4.count} / ป.6: ${s6.count}</div></div>
-      <div class="stat-card green"><div class="stat-label">อัตราส่งงานเฉลี่ย</div><div class="stat-value">${avg}%</div><div class="stat-sub">ป.4: ${s4.rate}% / ป.6: ${s6.rate}%</div></div>
-      <div class="stat-card red"><div class="stat-label">มีงานค้าง</div><div class="stat-value">${s4.hasMissing+s6.hasMissing}</div><div class="stat-sub">คน</div></div>
-      <div class="stat-card amber"><div class="stat-label">ส่งครบทุกชิ้น</div><div class="stat-value">${s4.fullySubmitted+s6.fullySubmitted}</div><div class="stat-sub">คน</div></div>
+      <div class="stat-card blue"><div class="stat-label">👨‍🎓 นักเรียนทั้งหมด</div><div class="stat-value">${s4.count+s6.count}</div><div class="stat-sub">ป.4: ${s4.count} / ป.6: ${s6.count}</div></div>
+      <div class="stat-card green"><div class="stat-label">📊 อัตราส่งงานเฉลี่ย</div><div class="stat-value">${avg}%</div><div class="stat-sub">ป.4: ${s4.rate}% / ป.6: ${s6.rate}%</div></div>
+      <div class="stat-card red"><div class="stat-label">⚠️ มีงานค้าง</div><div class="stat-value">${s4.hasMissing+s6.hasMissing}</div><div class="stat-sub">คน</div></div>
+      <div class="stat-card amber"><div class="stat-label">✅ ส่งครบทุกชิ้น</div><div class="stat-value">${s4.fullySubmitted+s6.fullySubmitted}</div><div class="stat-sub">คน</div></div>
     </div>
     <div class="grid2">
       <div class="card">
@@ -373,10 +375,10 @@ function renderClass(key, d, label) {
   const ex4pct = d.exCount?Math.round(d.students.reduce((a,x)=>a+x.exSubmitted,0)/d.students.length/d.exCount*100):0;
   const statsHtml = `
     <div class="stats">
-      <div class="stat-card blue"><div class="stat-label">นักเรียน</div><div class="stat-value">${s.count}</div><div class="stat-sub">คน</div></div>
-      <div class="stat-card green"><div class="stat-label">อัตราส่งงาน</div><div class="stat-value">${s.rate}%</div></div>
-      <div class="stat-card amber"><div class="stat-label">งานทั้งหมด</div><div class="stat-value">${s.total}</div><div class="stat-sub">หนังสือ ${d.nbCount} + ฝึกหัด ${d.exCount}</div></div>
-      <div class="stat-card red"><div class="stat-label">มีงานค้าง</div><div class="stat-value">${s.hasMissing}</div><div class="stat-sub">จาก ${s.count} คน</div></div>
+      <div class="stat-card blue"><div class="stat-label">👨‍🎓 นักเรียน</div><div class="stat-value">${s.count}</div><div class="stat-sub">คน</div></div>
+      <div class="stat-card green"><div class="stat-label">📊 อัตราส่งงาน</div><div class="stat-value">${s.rate}%</div></div>
+      <div class="stat-card amber"><div class="stat-label">📚 งานทั้งหมด</div><div class="stat-value">${s.total}</div><div class="stat-sub">หนังสือ ${d.nbCount} + ฝึกหัด ${d.exCount}</div></div>
+      <div class="stat-card red"><div class="stat-label">⚠️ มีงานค้าง</div><div class="stat-value">${s.hasMissing}</div><div class="stat-sub">จาก ${s.count} คน</div></div>
     </div>`;
   const chartHtml = `
     <div class="card" style="margin-bottom:20px">
