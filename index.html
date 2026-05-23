@@ -206,6 +206,7 @@ function parseSheet(rows) {
   if (rows.length < 4) return {students:[], nbCount:0, exCount:0};
   const hdr = rows[1] || [];
   const taskRow = rows[2] || [];
+  // หา range ของ column จาก header row 2 (น1..นN, ฝ1..ฝN)
   let nbStart=-1, nbEnd=-1, exStart=-1, exEnd=-1;
   for (let i=0; i<hdr.length; i++) {
     if (hdr[i].startsWith('น') && nbStart===-1) nbStart=i;
@@ -213,10 +214,20 @@ function parseSheet(rows) {
     if (hdr[i].startsWith('ฝ') && exStart===-1) exStart=i;
     if (hdr[i].startsWith('ฝ')) exEnd=i;
   }
-  const nbCount = nbEnd-nbStart+1;
-  const exCount = exEnd-exStart+1;
+  // นับเฉพาะ column ที่มีชื่องานจริงใน row 3 (ไม่ว่าง)
   const taskNames = [];
-  for (let i=nbStart; i<=exEnd; i++) taskNames.push(taskRow[i] || hdr[i] || `งาน${i-nbStart+1}`);
+  const activeNbCols = [];
+  const activeExCols = [];
+  for (let i=nbStart; i<=nbEnd; i++) {
+    const t = (taskRow[i]||'').trim();
+    if (t) { taskNames.push(t); activeNbCols.push(i); }
+  }
+  for (let i=exStart; i<=exEnd; i++) {
+    const t = (taskRow[i]||'').trim();
+    if (t) { taskNames.push(t); activeExCols.push(i); }
+  }
+  const nbCount = activeNbCols.length;
+  const exCount = activeExCols.length;
   const students = [];
   for (let r=3; r<rows.length; r++) {
     const row = rows[r];
@@ -224,12 +235,16 @@ function parseSheet(rows) {
     const fullName = row[1].trim();
     const name = fullName.replace(/^ด\.[ชญ]\./, '').trim();
     const submitted=[], missing=[];
-    for (let i=nbStart; i<=exEnd; i++) {
-      const isNb = i<=nbEnd;
-      const tname = taskNames[i-nbStart];
-      if ((row[i]||'').trim()==='ส่ง') submitted.push({name:tname,type:isNb?'nb':'ex'});
-      else missing.push({name:tname,type:isNb?'nb':'ex'});
-    }
+    activeNbCols.forEach((col,idx) => {
+      const tname = taskNames[idx];
+      if ((row[col]||'').trim()==='ส่ง') submitted.push({name:tname,type:'nb'});
+      else missing.push({name:tname,type:'nb'});
+    });
+    activeExCols.forEach((col,idx) => {
+      const tname = taskNames[activeNbCols.length+idx];
+      if ((row[col]||'').trim()==='ส่ง') submitted.push({name:tname,type:'ex'});
+      else missing.push({name:tname,type:'ex'});
+    });
     students.push({
       num: parseInt(row[0])||r-2, name, fullName,
       submitted: submitted.length, missing: missing.length,
