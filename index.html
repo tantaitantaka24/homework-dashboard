@@ -4,429 +4,116 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard การส่งงาน — คณิตศาสตร์</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  :root {
-    --bg: #0f1117;
-    --surface: #1a1d27;
-    --surface2: #22263a;
-    --border: rgba(255,255,255,0.07);
-    --border2: rgba(255,255,255,0.13);
-    --text: #e8eaf0;
-    --text2: #8b90a7;
-    --text3: #555a72;
-    --blue: #4f8ef7;
-    --blue-dim: rgba(79,142,247,0.15);
-    --green: #34c78a;
-    --green-dim: rgba(52,199,138,0.15);
-    --red: #f25c7a;
-    --red-dim: rgba(242,92,122,0.15);
-    --amber: #f5a623;
-    --amber-dim: rgba(245,166,35,0.15);
-    --radius: 12px;
-    --radius-sm: 8px;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'Sarabun', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    font-size: 15px;
-    line-height: 1.6;
-  }
-
-  /* HEADER */
-  .header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 56px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .header-title {
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .header-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 8px var(--green);
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .btn-refresh {
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    color: var(--text2);
-    padding: 6px 12px;
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-    font-family: 'Sarabun', sans-serif;
-    cursor: pointer;
-    transition: all 0.15s;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .btn-refresh:hover { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
-
-  .last-update {
-    font-size: 12px;
-    color: var(--text3);
-    font-family: 'IBM Plex Mono', monospace;
-  }
-
-  /* TABS */
-  .tabs {
-    display: flex;
-    gap: 4px;
-    padding: 16px 24px 0;
-  }
-  .tab {
-    padding: 8px 20px;
-    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    border: 1px solid transparent;
-    border-bottom: none;
-    transition: all 0.15s;
-    background: transparent;
-    color: var(--text3);
-    font-family: 'Sarabun', sans-serif;
-  }
-  .tab.active {
-    background: var(--surface);
-    color: var(--text);
-    border-color: var(--border2);
-  }
-  .tab:hover:not(.active) { color: var(--text2); }
-
-  /* MAIN */
-  .main {
-    padding: 0 24px 40px;
-  }
-  .panel {
-    display: none;
-    background: var(--surface);
-    border: 1px solid var(--border2);
-    border-radius: 0 var(--radius) var(--radius) var(--radius);
-    padding: 24px;
-    animation: fadeIn 0.2s ease;
-  }
-  .panel.active { display: block; }
-  @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
-
-  /* STATS GRID */
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
-    margin-bottom: 24px;
-  }
-  .stat-card {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 16px;
-    position: relative;
-    overflow: hidden;
-  }
-  .stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-  }
-  .stat-card.blue::before { background: var(--blue); }
-  .stat-card.green::before { background: var(--green); }
-  .stat-card.red::before { background: var(--red); }
-  .stat-card.amber::before { background: var(--amber); }
-  .stat-label { font-size: 12px; color: var(--text3); margin-bottom: 6px; }
-  .stat-value { font-size: 26px; font-weight: 600; line-height: 1.1; }
-  .stat-card.blue .stat-value { color: var(--blue); }
-  .stat-card.green .stat-value { color: var(--green); }
-  .stat-card.red .stat-value { color: var(--red); }
-  .stat-card.amber .stat-value { color: var(--amber); }
-  .stat-sub { font-size: 12px; color: var(--text3); margin-top: 4px; }
-
-  /* GRID 2 COL */
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
-  @media(max-width:640px) { .grid2 { grid-template-columns: 1fr; } }
-
-  .chart-card {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 16px;
-  }
-  .chart-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text2);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: 16px;
-  }
-
-  /* STUDENT TABLE */
-  .section-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text2);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .filter-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 12px;
-    flex-wrap: wrap;
-  }
-  .filter-btn {
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-family: 'Sarabun', sans-serif;
-    border: 1px solid var(--border2);
-    background: transparent;
-    color: var(--text2);
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .filter-btn.active { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
-  .filter-btn:hover:not(.active) { border-color: var(--text3); color: var(--text); }
-
-  .student-table { width: 100%; border-collapse: collapse; }
-  .student-table th {
-    text-align: left;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text3);
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    padding: 8px 12px;
-    border-bottom: 1px solid var(--border);
-  }
-  .student-table td {
-    padding: 10px 12px;
-    border-bottom: 1px solid var(--border);
-    font-size: 14px;
-    vertical-align: middle;
-  }
-  .student-table tr:last-child td { border-bottom: none; }
-  .student-table tr { transition: background 0.1s; cursor: pointer; }
-  .student-table tr:hover td { background: var(--surface2); }
-
-  .progress-bar {
-    background: var(--border);
-    border-radius: 4px;
-    height: 6px;
-    width: 100%;
-    min-width: 80px;
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    border-radius: 4px;
-    transition: width 0.4s ease;
-  }
-
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 2px 8px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 500;
-    white-space: nowrap;
-  }
-  .badge-red { background: var(--red-dim); color: var(--red); }
-  .badge-green { background: var(--green-dim); color: var(--green); }
-  .badge-amber { background: var(--amber-dim); color: var(--amber); }
-
-  /* MODAL / DRILL-DOWN */
-  .overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    z-index: 200;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-  .overlay.open { display: flex; }
-  .modal {
-    background: var(--surface);
-    border: 1px solid var(--border2);
-    border-radius: var(--radius);
-    width: 100%;
-    max-width: 560px;
-    max-height: 85vh;
-    overflow-y: auto;
-    animation: slideUp 0.2s ease;
-  }
-  @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
-
-  .modal-header {
-    padding: 20px 20px 16px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    background: var(--surface);
-    z-index: 1;
-  }
-  .modal-name { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
-  .modal-meta { font-size: 13px; color: var(--text2); }
-  .modal-close {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text2);
-    width: 32px; height: 32px;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: all 0.15s;
-  }
-  .modal-close:hover { color: var(--text); border-color: var(--text3); }
-  .modal-body { padding: 20px; }
-
-  .missing-section { margin-bottom: 20px; }
-  .missing-title {
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    color: var(--text3);
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .missing-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-  }
-  .missing-dot.red { background: var(--red); }
-  .missing-dot.amber { background: var(--amber); }
-
-  .missing-list { display: flex; flex-direction: column; gap: 4px; }
-  .missing-item {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 8px 12px;
-    font-size: 13px;
-    color: var(--text2);
-    border-left: 3px solid transparent;
-  }
-  .missing-item.nb { border-left-color: var(--amber); }
-  .missing-item.ex { border-left-color: var(--red); }
-
-  .modal-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 20px;
-  }
-  .modal-stat {
-    background: var(--surface2);
-    border-radius: var(--radius-sm);
-    padding: 10px 12px;
-    text-align: center;
-  }
-  .modal-stat-val { font-size: 20px; font-weight: 600; }
-  .modal-stat-label { font-size: 11px; color: var(--text3); margin-top: 2px; }
-
-  /* LOADING */
-  .loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding: 60px;
-    color: var(--text3);
-    font-size: 14px;
-  }
-  .spinner {
-    width: 20px; height: 20px;
-    border: 2px solid var(--border2);
-    border-top-color: var(--blue);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .error-msg {
-    background: var(--red-dim);
-    border: 1px solid var(--red);
-    border-radius: var(--radius-sm);
-    padding: 16px;
-    color: var(--red);
-    font-size: 14px;
-    margin-bottom: 16px;
-  }
-
-  /* COMPARISON BARS */
-  .compare-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-    font-size: 13px;
-  }
-  .compare-label { width: 40px; color: var(--text2); font-weight: 500; flex-shrink: 0; }
-  .compare-bar-wrap { flex: 1; background: var(--border); border-radius: 4px; height: 10px; overflow: hidden; }
-  .compare-bar-fill { height: 100%; border-radius: 4px; }
-  .compare-pct { width: 36px; text-align: right; color: var(--text2); font-family: 'IBM Plex Mono', monospace; font-size: 12px; flex-shrink: 0; }
-
-  .empty-state {
-    text-align: center;
-    padding: 40px;
-    color: var(--text3);
-    font-size: 14px;
-  }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Sarabun',sans-serif;background:#F5F6FA;color:#1a1d2e;font-size:16px;line-height:1.6;min-height:100vh}
+.header{background:#fff;border-bottom:1px solid #E5E7EF;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100}
+.header-left{display:flex;align-items:center;gap:10px}
+.live-dot{width:9px;height:9px;border-radius:50%;background:#1D9E75;box-shadow:0 0 0 3px rgba(29,158,117,0.15);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.header-title{font-size:16px;font-weight:600;color:#1a1d2e}
+.header-right{display:flex;align-items:center;gap:10px}
+.last-update{font-size:13px;color:#8B90A7;font-family:'IBM Plex Mono',monospace}
+.btn-refresh{background:#fff;border:1.5px solid #E5E7EF;color:#555;padding:7px 16px;border-radius:8px;font-size:14px;font-family:'Sarabun',sans-serif;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px;font-weight:500}
+.btn-refresh:hover{border-color:#378ADD;color:#378ADD;background:#F0F7FF}
+.tabs-bar{background:#fff;border-bottom:1px solid #E5E7EF;padding:0 20px;display:flex;gap:0}
+.tab{padding:14px 22px;font-size:15px;font-weight:500;cursor:pointer;border-bottom:2.5px solid transparent;color:#8B90A7;transition:all .15s;font-family:'Sarabun',sans-serif;background:none;border-top:none;border-left:none;border-right:none}
+.tab.active{color:#378ADD;border-bottom-color:#378ADD}
+.tab:hover:not(.active){color:#555}
+.main{padding:20px;max-width:1100px;margin:0 auto}
+.panel{display:none;animation:fadeIn .2s ease}
+.panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:#fff;border:1px solid #E5E7EF;border-radius:12px;padding:18px 20px;border-top:3px solid transparent;transition:box-shadow .15s}
+.stat-card:hover{box-shadow:0 2px 12px rgba(0,0,0,0.07)}
+.stat-card.blue{border-top-color:#378ADD}
+.stat-card.green{border-top-color:#1D9E75}
+.stat-card.red{border-top-color:#E24B4A}
+.stat-card.amber{border-top-color:#F5A623}
+.stat-label{font-size:13px;color:#8B90A7;margin-bottom:6px;font-weight:500}
+.stat-value{font-size:28px;font-weight:600;line-height:1.1}
+.stat-card.blue .stat-value{color:#378ADD}
+.stat-card.green .stat-value{color:#1D9E75}
+.stat-card.red .stat-value{color:#E24B4A}
+.stat-card.amber .stat-value{color:#F5A623}
+.stat-sub{font-size:13px;color:#B0B5C8;margin-top:4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+@media(max-width:600px){.grid2{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid #E5E7EF;border-radius:12px;padding:18px 20px}
+.card-title{font-size:12px;font-weight:600;color:#8B90A7;text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px}
+.compare-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.compare-label{width:36px;font-size:14px;color:#555;font-weight:600}
+.compare-bar-wrap{flex:1;background:#F0F1F5;border-radius:5px;height:10px;overflow:hidden}
+.compare-bar-fill{height:100%;border-radius:5px;transition:width .5s ease}
+.compare-pct{width:38px;text-align:right;font-size:13px;color:#555;font-family:'IBM Plex Mono',monospace}
+.search-wrap{position:relative;margin-bottom:12px}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#B0B5C8;font-size:16px}
+.search-input{width:100%;padding:11px 14px 11px 38px;border:1.5px solid #E5E7EF;border-radius:10px;font-size:15px;font-family:'Sarabun',sans-serif;color:#1a1d2e;background:#fff;outline:none;transition:border .15s}
+.search-input:focus{border-color:#378ADD}
+.search-input::placeholder{color:#B0B5C8}
+.filter-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.filter-btn{padding:7px 16px;border-radius:20px;font-size:14px;font-family:'Sarabun',sans-serif;border:1.5px solid #E5E7EF;background:#fff;color:#8B90A7;cursor:pointer;transition:all .15s;font-weight:500}
+.filter-btn.active{background:#EBF4FF;color:#378ADD;border-color:#378ADD}
+.filter-btn:hover:not(.active){border-color:#C0C5D8;color:#555}
+.section-title{font-size:13px;font-weight:600;color:#8B90A7;text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px}
+.student-list{display:flex;flex-direction:column;gap:8px}
+.student-row{background:#fff;border:1px solid #E5E7EF;border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .15s}
+.student-row:hover{border-color:#378ADD;box-shadow:0 2px 10px rgba(55,138,221,0.1)}
+.student-badge{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.badge-green{background:#E8F8F2;color:#1D9E75}
+.badge-amber{background:#FEF6E4;color:#D4900A}
+.badge-red{background:#FEF0EF;color:#E24B4A}
+.student-name{font-size:16px;font-weight:600;color:#1a1d2e;flex:1;min-width:0}
+.student-class{font-size:13px;color:#8B90A7;margin-top:1px}
+.student-stats{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.progress-mini{width:70px}
+.progress-track{background:#F0F1F5;border-radius:4px;height:6px;overflow:hidden;margin-bottom:3px}
+.progress-fill{height:100%;border-radius:4px}
+.pct-label{font-size:12px;color:#B0B5C8;text-align:right;font-family:'IBM Plex Mono',monospace}
+.missing-badge{padding:5px 12px;border-radius:20px;font-size:13px;font-weight:600;white-space:nowrap}
+.missing-many{background:#FEF0EF;color:#E24B4A}
+.missing-some{background:#FEF6E4;color:#D4900A}
+.missing-few{background:#E8F8F2;color:#1D9E75}
+.arrow-btn{color:#C0C5D8;font-size:18px;font-weight:300}
+.overlay{display:none;position:fixed;inset:0;background:rgba(30,35,60,0.45);z-index:200;align-items:center;justify-content:center;padding:16px}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:16px;width:100%;max-width:520px;max-height:88vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.15)}
+.modal-header{padding:20px 22px 16px;border-bottom:1px solid #E5E7EF;display:flex;align-items:flex-start;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1;border-radius:16px 16px 0 0}
+.modal-name{font-size:20px;font-weight:700;margin-bottom:3px;color:#1a1d2e}
+.modal-meta{font-size:14px;color:#8B90A7}
+.modal-close{background:#F5F6FA;border:1px solid #E5E7EF;color:#8B90A7;width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.modal-close:hover{color:#1a1d2e;border-color:#C0C5D8}
+.modal-body{padding:20px 22px}
+.modal-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:18px}
+.modal-stat{background:#F8F9FC;border-radius:10px;padding:12px 14px;text-align:center}
+.modal-stat-val{font-size:22px;font-weight:700}
+.modal-stat-label{font-size:13px;color:#8B90A7;margin-top:2px}
+.modal-progress{background:#F0F1F5;border-radius:6px;height:10px;overflow:hidden;margin-bottom:20px}
+.modal-progress-fill{height:100%;border-radius:6px;transition:width .5s ease}
+.missing-section{margin-bottom:18px}
+.missing-section-title{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#8B90A7;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.missing-dot{width:7px;height:7px;border-radius:50%}
+.missing-items{display:flex;flex-direction:column;gap:5px}
+.missing-item{background:#F8F9FC;border-radius:8px;padding:10px 14px;font-size:14px;color:#555;border-left:3px solid transparent}
+.missing-item.nb{border-left-color:#F5A623}
+.missing-item.ex{border-left-color:#E24B4A}
+.all-done{text-align:center;padding:28px;color:#1D9E75;font-size:16px;font-weight:500}
+.loading{display:flex;align-items:center;justify-content:center;gap:12px;padding:60px;color:#8B90A7;font-size:15px}
+.spinner{width:22px;height:22px;border:2.5px solid #E5E7EF;border-top-color:#378ADD;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-msg{background:#FEF0EF;border:1.5px solid #F9C8C7;border-radius:10px;padding:16px 18px;color:#C0392B;font-size:15px;margin-bottom:16px;line-height:1.7}
+.empty-state{text-align:center;padding:40px;color:#B0B5C8;font-size:15px}
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div class="header-title">
-    <div class="header-dot"></div>
-    Dashboard การส่งงาน — คณิตศาสตร์
+  <div class="header-left">
+    <div class="live-dot"></div>
+    <span class="header-title">Dashboard การส่งงาน — คณิตศาสตร์</span>
   </div>
   <div class="header-right">
     <span class="last-update" id="lastUpdate">กำลังโหลด...</span>
@@ -434,38 +121,24 @@
   </div>
 </div>
 
-<div class="tabs">
+<div class="tabs-bar">
   <button class="tab active" onclick="switchTab('overview')">ภาพรวม</button>
   <button class="tab" onclick="switchTab('p4')">ป.4</button>
   <button class="tab" onclick="switchTab('p6')">ป.6</button>
 </div>
 
 <div class="main">
-
-  <!-- OVERVIEW PANEL -->
   <div class="panel active" id="panel-overview">
-    <div id="overview-content">
-      <div class="loading"><div class="spinner"></div>กำลังดึงข้อมูลจาก Google Sheets...</div>
-    </div>
+    <div id="overview-content"><div class="loading"><div class="spinner"></div>กำลังดึงข้อมูลจาก Google Sheets...</div></div>
   </div>
-
-  <!-- P4 PANEL -->
   <div class="panel" id="panel-p4">
-    <div id="p4-content">
-      <div class="loading"><div class="spinner"></div>กำลังโหลด...</div>
-    </div>
+    <div id="p4-content"><div class="loading"><div class="spinner"></div>กำลังโหลด...</div></div>
   </div>
-
-  <!-- P6 PANEL -->
   <div class="panel" id="panel-p6">
-    <div id="p6-content">
-      <div class="loading"><div class="spinner"></div>กำลังโหลด...</div>
-    </div>
+    <div id="p6-content"><div class="loading"><div class="spinner"></div>กำลังโหลด...</div></div>
   </div>
-
 </div>
 
-<!-- MODAL -->
 <div class="overlay" id="overlay" onclick="closeModal(event)">
   <div class="modal" id="modal">
     <div class="modal-header">
@@ -481,37 +154,30 @@
 
 <script>
 const SHEET_ID = '1B_10xc1K2HYEHACRxxc9OoKoW5kmfQe0aMYKBES15Q8';
-// Sheet GIDs — ดูจาก URL ของแต่ละ tab ใน Google Sheets
-// คณิตศาสตร์ ป.4 และ ป.6 — ใช้ CSV export ซึ่งทำงานได้จาก file:// โดยไม่ติด CORS
-const GID_P4 = '21024681';   // gid ของ Sheet คณิตศาสตร์ ป.4
-const GID_P6 = '1784260155'; // gid ของ Sheet คณิตศาสตร์ ป.6
-
-let data = { p4: null, p6: null };
+const GID_P4 = '21024681';
+const GID_P6 = '1784260155';
+let data = {p4:null, p6:null};
 let charts = {};
-let currentFilter = { p4: 'all', p6: 'all' };
+let currentFilter = {p4:'all', p6:'all'};
+let searchQuery = {p4:'', p6:''};
 
-// ── FETCH via CSV export ────────────────────────────────────
 async function fetchCSV(gid) {
   const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const text = await res.text();
-  return parseCSV(text);
+  return parseCSV(await res.text());
 }
 
 function parseCSV(text) {
-  const lines = text.split('\n');
-  return lines.map(line => {
-    const cols = [];
-    let cur = '', inQ = false;
+  return text.split('\n').map(line => {
+    const cols = []; let cur = '', inQ = false;
     for (let i = 0; i < line.length; i++) {
       const ch = line[i];
       if (ch === '"') { inQ = !inQ; }
       else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
       else { cur += ch; }
     }
-    cols.push(cur.trim());
-    return cols;
+    cols.push(cur.trim()); return cols;
   });
 }
 
@@ -519,422 +185,292 @@ async function loadData() {
   document.getElementById('lastUpdate').textContent = 'กำลังโหลด...';
   ['overview','p4','p6'].forEach(k => {
     const el = document.getElementById(`${k}-content`);
-    if (el) el.innerHTML = '<div class="loading"><div class="spinner"></div>กำลังดึงข้อมูลจาก Google Sheets...</div>';
+    if (el) el.innerHTML = '<div class="loading"><div class="spinner"></div>กำลังดึงข้อมูล...</div>';
   });
   try {
-    const [rows4, rows6] = await Promise.all([
-      fetchCSV(GID_P4),
-      fetchCSV(GID_P6),
-    ]);
-
-    data.p4 = parseClassSheet(rows4);
-    data.p6 = parseClassSheet(rows6);
-
+    const [r4, r6] = await Promise.all([fetchCSV(GID_P4), fetchCSV(GID_P6)]);
+    data.p4 = parseSheet(r4);
+    data.p6 = parseSheet(r6);
     const now = new Date();
     document.getElementById('lastUpdate').textContent =
       `อัปเดต ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')} น.`;
-
     renderAll();
   } catch(e) {
-    const msg = `<div class="error-msg">⚠ ดึงข้อมูลไม่ได้: ${e.message}<br>
-      <small>วิธีแก้: Upload ไฟล์ HTML นี้ขึ้น Google Drive → คลิกขวา → Open with Chrome (ไม่ใช่เปิดจาก Downloads โดยตรง)</small></div>`;
-    document.getElementById('overview-content').innerHTML = msg;
+    document.getElementById('overview-content').innerHTML =
+      `<div class="error-msg">⚠ ดึงข้อมูลไม่ได้: ${e.message}<br><small style="font-size:13px">ตรวจสอบว่า Sheet แชร์เป็น "Anyone with the link can view" แล้ว</small></div>`;
     document.getElementById('lastUpdate').textContent = 'โหลดไม่สำเร็จ';
   }
 }
 
-// ── PARSE ──────────────────────────────────────────────────
-function parseClassSheet(rows) {
-  // rows[0] = group header, rows[1] = col labels (น1..นN, ฝ1..ฝN, จำนวน, ขาดส่ง)
-  // rows[2] = task names (row3 in sheet)
-  // rows[3+] = student data
-  if (rows.length < 4) return { students: [], taskNames: [], nbCount: 0, exCount: 0 };
-
-  const headerRow = rows[1] || [];
-  const taskRow   = rows[2] || [];
-
-  // find nb cols (น1..) and ex cols (ฝ1..)
-  let nbStart = -1, nbEnd = -1, exStart = -1, exEnd = -1;
-  for (let i = 0; i < headerRow.length; i++) {
-    const v = headerRow[i];
-    if (v.startsWith('น') && nbStart === -1) nbStart = i;
-    if (v.startsWith('น')) nbEnd = i;
-    if (v.startsWith('ฝ') && exStart === -1) exStart = i;
-    if (v.startsWith('ฝ')) exEnd = i;
+function parseSheet(rows) {
+  if (rows.length < 4) return {students:[], nbCount:0, exCount:0};
+  const hdr = rows[1] || [];
+  const taskRow = rows[2] || [];
+  let nbStart=-1, nbEnd=-1, exStart=-1, exEnd=-1;
+  for (let i=0; i<hdr.length; i++) {
+    if (hdr[i].startsWith('น') && nbStart===-1) nbStart=i;
+    if (hdr[i].startsWith('น')) nbEnd=i;
+    if (hdr[i].startsWith('ฝ') && exStart===-1) exStart=i;
+    if (hdr[i].startsWith('ฝ')) exEnd=i;
   }
-
-  const nbCount = nbEnd - nbStart + 1;
-  const exCount = exEnd - exStart + 1;
-
+  const nbCount = nbEnd-nbStart+1;
+  const exCount = exEnd-exStart+1;
   const taskNames = [];
-  for (let i = nbStart; i <= exEnd; i++) {
-    taskNames.push(taskRow[i] || headerRow[i] || `งาน ${i - nbStart + 1}`);
-  }
-
+  for (let i=nbStart; i<=exEnd; i++) taskNames.push(taskRow[i] || hdr[i] || `งาน${i-nbStart+1}`);
   const students = [];
-  for (let r = 3; r < rows.length; r++) {
+  for (let r=3; r<rows.length; r++) {
     const row = rows[r];
     if (!row[0] || !row[1]) continue;
-    const name = row[1].replace(/^ด\.[ชญ]\./, '').trim();
     const fullName = row[1].trim();
-
-    const submitted = [];
-    const missing = [];
-    for (let i = nbStart; i <= exEnd; i++) {
-      const val = row[i] || '';
-      const taskName = taskNames[i - nbStart];
-      const isNb = i <= nbEnd;
-      if (val === 'ส่ง') {
-        submitted.push({ name: taskName, type: isNb ? 'nb' : 'ex', col: i });
-      } else {
-        missing.push({ name: taskName, type: isNb ? 'nb' : 'ex', col: i });
-      }
+    const name = fullName.replace(/^ด\.[ชญ]\./, '').trim();
+    const submitted=[], missing=[];
+    for (let i=nbStart; i<=exEnd; i++) {
+      const isNb = i<=nbEnd;
+      const tname = taskNames[i-nbStart];
+      if ((row[i]||'').trim()==='ส่ง') submitted.push({name:tname,type:isNb?'nb':'ex'});
+      else missing.push({name:tname,type:isNb?'nb':'ex'});
     }
-
     students.push({
-      num: parseInt(row[0]) || r - 2,
-      name, fullName,
-      submitted: submitted.length,
-      missing: missing.length,
-      total: nbCount + exCount,
-      missingList: missing,
-      submittedList: submitted,
-      nbSubmitted: submitted.filter(x => x.type === 'nb').length,
-      exSubmitted: submitted.filter(x => x.type === 'ex').length,
-      nbMissing: missing.filter(x => x.type === 'nb').length,
-      exMissing: missing.filter(x => x.type === 'ex').length,
+      num: parseInt(row[0])||r-2, name, fullName,
+      submitted: submitted.length, missing: missing.length,
+      total: nbCount+exCount,
+      missingList: missing, submittedList: submitted,
+      nbSubmitted: submitted.filter(x=>x.type==='nb').length,
+      exSubmitted: submitted.filter(x=>x.type==='ex').length,
+      nbMissing: missing.filter(x=>x.type==='nb').length,
+      exMissing: missing.filter(x=>x.type==='ex').length,
     });
   }
-
-  return { students, taskNames, nbCount, exCount, nbStart, exStart };
+  return {students, nbCount, exCount};
 }
 
-// ── RENDER ─────────────────────────────────────────────────
+function calcStats(d) {
+  if (!d||!d.students.length) return null;
+  const s=d.students, total=d.nbCount+d.exCount;
+  const totalSlots=s.length*total;
+  const totalSubmitted=s.reduce((a,x)=>a+x.submitted,0);
+  const rate=totalSlots?Math.round(totalSubmitted/totalSlots*100):0;
+  return {total, totalSlots, totalSubmitted, rate,
+    fullySubmitted:s.filter(x=>x.missing===0).length,
+    hasMissing:s.filter(x=>x.missing>0).length,
+    count:s.length};
+}
+
+function studentBadge(s) {
+  const pct = s.total ? Math.round(s.submitted/s.total*100) : 0;
+  if (pct>=80) return {cls:'badge-green', label: s.name.substring(0,2)};
+  if (pct>=40) return {cls:'badge-amber', label: s.name.substring(0,2)};
+  return {cls:'badge-red', label: s.name.substring(0,2)};
+}
+
+function missingBadgeClass(missing) {
+  if (missing===0) return 'missing-few';
+  if (missing<=10) return 'missing-some';
+  return 'missing-many';
+}
+
+function progressColor(pct) {
+  if (pct>=80) return '#1D9E75';
+  if (pct>=40) return '#F5A623';
+  return '#E24B4A';
+}
+
+function renderStudentRow(s, showClass) {
+  const pct = s.total ? Math.round(s.submitted/s.total*100) : 0;
+  const b = studentBadge(s);
+  const cls = s.class||'';
+  return `<div class="student-row" onclick="openModal('${s.fullName.replace(/'/g,"\\'")}','${cls}')">
+    <div class="student-badge ${b.cls}">${b.label}</div>
+    <div style="flex:1;min-width:0">
+      <div class="student-name">${s.name}</div>
+      ${showClass ? `<div class="student-class">${cls}</div>` : ''}
+    </div>
+    <div class="student-stats">
+      <div class="progress-mini">
+        <div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${progressColor(pct)}"></div></div>
+        <div class="pct-label">${pct}%</div>
+      </div>
+      <span style="font-size:14px;color:#8B90A7;font-family:'IBM Plex Mono',monospace;min-width:52px;text-align:right">${s.submitted}/${s.total}</span>
+      <span class="missing-badge ${missingBadgeClass(s.missing)}">${s.missing===0?'ครบ':s.missing+' ชิ้น'}</span>
+      <span class="arrow-btn">›</span>
+    </div>
+  </div>`;
+}
+
 function renderAll() {
   renderOverview();
   renderClass('p4', data.p4, 'ป.4');
   renderClass('p6', data.p6, 'ป.6');
 }
 
-function calcStats(d) {
-  if (!d || !d.students.length) return null;
-  const s = d.students;
-  const total = d.nbCount + d.exCount;
-  const totalSlots = s.length * total;
-  const totalSubmitted = s.reduce((a, x) => a + x.submitted, 0);
-  const rate = totalSlots ? Math.round(totalSubmitted / totalSlots * 100) : 0;
-  const fullySubmitted = s.filter(x => x.missing === 0).length;
-  const hasMissing = s.filter(x => x.missing > 0).length;
-  return { total, totalSlots, totalSubmitted, rate, fullySubmitted, hasMissing, count: s.length };
-}
-
 function renderOverview() {
-  const s4 = calcStats(data.p4);
-  const s6 = calcStats(data.p6);
-  if (!s4 || !s6) return;
-
-  const allStudents = s4.count + s6.count;
-  const allMissing = s4.hasMissing + s6.hasMissing;
-  const avgRate = Math.round((s4.rate + s6.rate) / 2);
-
+  const s4=calcStats(data.p4), s6=calcStats(data.p6);
+  if (!s4||!s6) return;
+  const avg = Math.round((s4.rate+s6.rate)/2);
   const html = `
     <div class="stats">
-      <div class="stat-card blue">
-        <div class="stat-label">นักเรียนทั้งหมด</div>
-        <div class="stat-value">${allStudents}</div>
-        <div class="stat-sub">ป.4: ${s4.count} / ป.6: ${s6.count}</div>
-      </div>
-      <div class="stat-card green">
-        <div class="stat-label">อัตราส่งงานเฉลี่ย</div>
-        <div class="stat-value">${avgRate}%</div>
-        <div class="stat-sub">ป.4: ${s4.rate}% / ป.6: ${s6.rate}%</div>
-      </div>
-      <div class="stat-card red">
-        <div class="stat-label">มีงานค้าง</div>
-        <div class="stat-value">${allMissing}</div>
-        <div class="stat-sub">คน</div>
-      </div>
-      <div class="stat-card amber">
-        <div class="stat-label">ส่งครบทุกชิ้น</div>
-        <div class="stat-value">${s4.fullySubmitted + s6.fullySubmitted}</div>
-        <div class="stat-sub">คน</div>
-      </div>
+      <div class="stat-card blue"><div class="stat-label">นักเรียนทั้งหมด</div><div class="stat-value">${s4.count+s6.count}</div><div class="stat-sub">ป.4: ${s4.count} / ป.6: ${s6.count}</div></div>
+      <div class="stat-card green"><div class="stat-label">อัตราส่งงานเฉลี่ย</div><div class="stat-value">${avg}%</div><div class="stat-sub">ป.4: ${s4.rate}% / ป.6: ${s6.rate}%</div></div>
+      <div class="stat-card red"><div class="stat-label">มีงานค้าง</div><div class="stat-value">${s4.hasMissing+s6.hasMissing}</div><div class="stat-sub">คน</div></div>
+      <div class="stat-card amber"><div class="stat-label">ส่งครบทุกชิ้น</div><div class="stat-value">${s4.fullySubmitted+s6.fullySubmitted}</div><div class="stat-sub">คน</div></div>
     </div>
-
     <div class="grid2">
-      <div class="chart-card">
-        <div class="chart-title">อัตราส่งงาน — เปรียบเทียบ</div>
-        <div class="compare-row">
-          <span class="compare-label">ป.4</span>
-          <div class="compare-bar-wrap"><div class="compare-bar-fill" style="width:${s4.rate}%;background:var(--blue)"></div></div>
-          <span class="compare-pct">${s4.rate}%</span>
-        </div>
-        <div class="compare-row">
-          <span class="compare-label">ป.6</span>
-          <div class="compare-bar-wrap"><div class="compare-bar-fill" style="width:${s6.rate}%;background:var(--green)"></div></div>
-          <span class="compare-pct">${s6.rate}%</span>
-        </div>
-        <div style="margin-top:20px">
+      <div class="card">
+        <div class="card-title">อัตราส่งงาน — เปรียบเทียบ</div>
+        <div class="compare-row"><span class="compare-label">ป.4</span><div class="compare-bar-wrap"><div class="compare-bar-fill" style="width:${s4.rate}%;background:#378ADD"></div></div><span class="compare-pct">${s4.rate}%</span></div>
+        <div class="compare-row"><span class="compare-label">ป.6</span><div class="compare-bar-wrap"><div class="compare-bar-fill" style="width:${s6.rate}%;background:#1D9E75"></div></div><span class="compare-pct">${s6.rate}%</span></div>
+        <div style="margin-top:18px;padding-top:14px;border-top:1px solid #F0F1F5">
           <div class="compare-row">
-            <span class="compare-label" style="width:60px;font-size:12px">หนังสือ ป.4</span>
-            <div class="compare-bar-wrap"><div class="compare-bar-fill" style="width:${data.p4.nbCount ? Math.round(data.p4.students.reduce((a,x)=>a+x.nbSubmitted,0)/data.p4.students.length/data.p4.nbCount*100) : 0}%;background:var(--amber)"></div></div>
-            <span class="compare-pct">${data.p4.nbCount ? Math.round(data.p4.students.reduce((a,x)=>a+x.nbSubmitted,0)/data.p4.students.length/data.p4.nbCount*100) : 0}%</span>
+            <span class="compare-label" style="width:80px;font-size:13px">หนังสือ ป.4</span>
+            <div class="compare-bar-wrap"><div class="compare-bar-fill" style="width:${data.p4.nbCount?Math.round(data.p4.students.reduce((a,x)=>a+x.nbSubmitted,0)/data.p4.students.length/data.p4.nbCount*100):0}%;background:#F5A623"></div></div>
+            <span class="compare-pct">${data.p4.nbCount?Math.round(data.p4.students.reduce((a,x)=>a+x.nbSubmitted,0)/data.p4.students.length/data.p4.nbCount*100):0}%</span>
           </div>
           <div class="compare-row">
-            <span class="compare-label" style="width:60px;font-size:12px">แบบฝึกฯ ป.4</span>
-            <div class="compare-bar-wrap"><div class="compare-bar-fill" style="width:${data.p4.exCount ? Math.round(data.p4.students.reduce((a,x)=>a+x.exSubmitted,0)/data.p4.students.length/data.p4.exCount*100) : 0}%;background:var(--red)"></div></div>
-            <span class="compare-pct">${data.p4.exCount ? Math.round(data.p4.students.reduce((a,x)=>a+x.exSubmitted,0)/data.p4.students.length/data.p4.exCount*100) : 0}%</span>
+            <span class="compare-label" style="width:80px;font-size:13px">ฝึกหัด ป.4</span>
+            <div class="compare-bar-wrap"><div class="compare-bar-fill" style="width:${data.p4.exCount?Math.round(data.p4.students.reduce((a,x)=>a+x.exSubmitted,0)/data.p4.students.length/data.p4.exCount*100):0}%;background:#E24B4A"></div></div>
+            <span class="compare-pct">${data.p4.exCount?Math.round(data.p4.students.reduce((a,x)=>a+x.exSubmitted,0)/data.p4.students.length/data.p4.exCount*100):0}%</span>
           </div>
         </div>
       </div>
-      <div class="chart-card">
-        <div class="chart-title">สัดส่วนการส่ง</div>
-        <div style="position:relative;height:180px">
-          <canvas id="chart-overview-donut" role="img" aria-label="กราฟวงกลมแสดงสัดส่วนการส่งงาน">ป.4 ส่ง ${s4.totalSubmitted} ขาด ${s4.totalSlots-s4.totalSubmitted} | ป.6 ส่ง ${s6.totalSubmitted} ขาด ${s6.totalSlots-s6.totalSubmitted}</canvas>
-        </div>
-        <div style="display:flex;gap:16px;justify-content:center;margin-top:10px;font-size:12px;color:var(--text3)">
-          <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:var(--blue);display:inline-block"></span>ป.4 ส่ง</span>
-          <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:var(--green);display:inline-block"></span>ป.6 ส่ง</span>
-          <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:rgba(255,255,255,0.1);display:inline-block"></span>ขาด</span>
+      <div class="card">
+        <div class="card-title">สัดส่วนการส่ง (รวม 2 ห้อง)</div>
+        <div style="position:relative;height:190px"><canvas id="chart-overview-donut" role="img" aria-label="กราฟวงกลมสัดส่วนการส่งงาน"></canvas></div>
+        <div style="display:flex;gap:14px;justify-content:center;margin-top:10px;font-size:13px;color:#8B90A7;flex-wrap:wrap">
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:#378ADD;display:inline-block"></span>ป.4 ส่ง</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:#1D9E75;display:inline-block"></span>ป.6 ส่ง</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:#E5E7EF;display:inline-block"></span>ขาด</span>
         </div>
       </div>
-    </div>
-
-  `;
-
+    </div>`;
   document.getElementById('overview-content').innerHTML = html;
-
-  // donut chart
   if (charts['overview-donut']) charts['overview-donut'].destroy();
-  charts['overview-donut'] = new Chart(document.getElementById('chart-overview-donut'), {
-    type: 'doughnut',
-    data: {
-      labels: ['ป.4 ส่ง', 'ป.6 ส่ง', 'ขาด'],
-      datasets: [{
-        data: [s4.totalSubmitted, s6.totalSubmitted, (s4.totalSlots - s4.totalSubmitted) + (s6.totalSlots - s6.totalSubmitted)],
-        backgroundColor: ['#4f8ef7', '#34c78a', 'rgba(255,255,255,0.07)'],
-        borderWidth: 0,
-        hoverOffset: 4,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      cutout: '68%',
-      plugins: { legend: { display: false }, tooltip: {
-        callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}` }
-      }}
-    }
+  charts['overview-donut'] = new Chart(document.getElementById('chart-overview-donut'),{
+    type:'doughnut',
+    data:{labels:['ป.4 ส่ง','ป.6 ส่ง','ขาด'],datasets:[{data:[s4.totalSubmitted,s6.totalSubmitted,(s4.totalSlots-s4.totalSubmitted)+(s6.totalSlots-s6.totalSubmitted)],backgroundColor:['#378ADD','#1D9E75','#E5E7EF'],borderWidth:0,hoverOffset:4}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false}}}
   });
-}
-
-function renderTopMissingTable(students, prefix) {
-  if (!students.length) return '<div class="empty-state">ไม่มีนักเรียนค้างงาน 🎉</div>';
-  return `<table class="student-table">
-    <thead><tr>
-      <th>ชื่อ</th>
-      ${prefix === 'overview' ? '<th>ห้อง</th>' : ''}
-      <th>ส่งแล้ว</th>
-      <th style="min-width:100px">ความคืบหน้า</th>
-      <th>ขาดส่ง</th>
-    </tr></thead>
-    <tbody>
-    ${students.map(s => {
-      const pct = s.total ? Math.round(s.submitted / s.total * 100) : 0;
-      const cls = s.class || '';
-      const badgeCls = s.missing === 0 ? 'badge-green' : s.missing <= 3 ? 'badge-amber' : 'badge-red';
-      return `<tr onclick="openModal('${s.fullName.replace(/'/g,"\\'")}','${cls}')">
-        <td style="font-weight:500">${s.name}</td>
-        ${prefix === 'overview' ? `<td><span class="badge badge-amber">${cls}</span></td>` : ''}
-        <td style="color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:13px">${s.submitted}/${s.total}</td>
-        <td>
-          <div style="display:flex;align-items:center;gap:8px">
-            <div class="progress-bar" style="width:80px">
-              <div class="progress-fill" style="width:${pct}%;background:${pct>=80?'var(--green)':pct>=50?'var(--amber)':'var(--red)'}"></div>
-            </div>
-            <span style="font-size:12px;color:var(--text3);font-family:'IBM Plex Mono',monospace">${pct}%</span>
-          </div>
-        </td>
-        <td><span class="badge ${badgeCls}">${s.missing} ชิ้น</span></td>
-      </tr>`;
-    }).join('')}
-    </tbody>
-  </table>`;
 }
 
 function renderClass(key, d, label) {
   if (!d) return;
   const s = calcStats(d);
-  const contentId = `${key}-content`;
-
-  const htmlStats = `
+  const nb4pct = d.nbCount?Math.round(d.students.reduce((a,x)=>a+x.nbSubmitted,0)/d.students.length/d.nbCount*100):0;
+  const ex4pct = d.exCount?Math.round(d.students.reduce((a,x)=>a+x.exSubmitted,0)/d.students.length/d.exCount*100):0;
+  const statsHtml = `
     <div class="stats">
-      <div class="stat-card blue">
-        <div class="stat-label">นักเรียน</div>
-        <div class="stat-value">${s.count}</div>
-        <div class="stat-sub">คน</div>
-      </div>
-      <div class="stat-card green">
-        <div class="stat-label">อัตราส่งงาน</div>
-        <div class="stat-value">${s.rate}%</div>
-        <div class="stat-sub">${s.totalSubmitted}/${s.totalSlots} ชิ้น</div>
-      </div>
-      <div class="stat-card amber">
-        <div class="stat-label">งานทั้งหมด</div>
-        <div class="stat-value">${s.total}</div>
-        <div class="stat-sub">หนังสือ ${d.nbCount} + ฝึกหัด ${d.exCount}</div>
-      </div>
-      <div class="stat-card red">
-        <div class="stat-label">มีงานค้าง</div>
-        <div class="stat-value">${s.hasMissing}</div>
-        <div class="stat-sub">จาก ${s.count} คน</div>
-      </div>
+      <div class="stat-card blue"><div class="stat-label">นักเรียน</div><div class="stat-value">${s.count}</div><div class="stat-sub">คน</div></div>
+      <div class="stat-card green"><div class="stat-label">อัตราส่งงาน</div><div class="stat-value">${s.rate}%</div><div class="stat-sub">${s.totalSubmitted}/${s.totalSlots} ชิ้น</div></div>
+      <div class="stat-card amber"><div class="stat-label">งานทั้งหมด</div><div class="stat-value">${s.total}</div><div class="stat-sub">หนังสือ ${d.nbCount} + ฝึกหัด ${d.exCount}</div></div>
+      <div class="stat-card red"><div class="stat-label">มีงานค้าง</div><div class="stat-value">${s.hasMissing}</div><div class="stat-sub">จาก ${s.count} คน</div></div>
     </div>`;
-
-  const htmlChart = `
-    <div class="chart-card" style="margin-bottom:16px">
-      <div class="chart-title">หนังสือ vs แบบฝึกหัด — สรุปทั้งห้อง</div>
-      <div style="display:flex;gap:16px;margin-bottom:8px;font-size:12px;color:var(--text3)">
-        <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:#34c78a;display:inline-block"></span>ส่งแล้ว</span>
-        <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:#f25c7a;display:inline-block"></span>ขาดส่ง</span>
+  const chartHtml = `
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title">หนังสือ vs แบบฝึกหัด — สรุปทั้งห้อง</div>
+      <div style="display:flex;gap:14px;margin-bottom:10px;font-size:13px;color:#8B90A7">
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:#1D9E75;display:inline-block"></span>ส่งแล้ว</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:#E24B4A;display:inline-block"></span>ขาดส่ง</span>
       </div>
-      <div style="position:relative;height:200px">
-        <canvas id="chart-${key}-compare" role="img" aria-label="กราฟเปรียบเทียบการส่งหนังสือและแบบฝึกหัด"></canvas>
-      </div>
+      <div style="position:relative;height:200px"><canvas id="chart-${key}-compare" role="img" aria-label="กราฟเปรียบเทียบหนังสือและแบบฝึกหัด"></canvas></div>
     </div>`;
-
-  const filterBtns = `
+  const tableHtml = `
+    <div class="section-title">รายชื่อนักเรียน <span style="font-weight:400;text-transform:none;font-size:13px;color:#B0B5C8">(แตะชื่อเพื่อดูรายละเอียด)</span></div>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" type="text" placeholder="ค้นหาชื่อนักเรียน..." oninput="onSearch('${key}',this.value)" value="${searchQuery[key]||''}">
+    </div>
     <div class="filter-row">
-      <button class="filter-btn ${currentFilter[key]==='all'?'active':''}" onclick="setFilter('${key}','all')">ทั้งหมด (${d.students.length})</button>
+      <button class="filter-btn ${currentFilter[key]==='all'?'active':''}" onclick="setFilter('${key}','all')">ทั้งหมด (${s.count})</button>
       <button class="filter-btn ${currentFilter[key]==='missing'?'active':''}" onclick="setFilter('${key}','missing')">มีงานค้าง (${s.hasMissing})</button>
       <button class="filter-btn ${currentFilter[key]==='ok'?'active':''}" onclick="setFilter('${key}','ok')">ส่งครบ (${s.fullySubmitted})</button>
+    </div>
+    <div class="student-list" id="list-${key}">
+      ${buildStudentList(key, d, label)}
     </div>`;
-
-  const filtered = currentFilter[key] === 'missing'
-    ? d.students.filter(x => x.missing > 0)
-    : currentFilter[key] === 'ok'
-    ? d.students.filter(x => x.missing === 0)
-    : d.students;
-
-  const htmlTable = `
-    <div class="section-title">รายชื่อนักเรียน <span style="font-weight:400;text-transform:none;color:var(--text3);font-size:12px">(คลิกเพื่อดูรายละเอียด)</span></div>
-    ${filterBtns}
-    ${renderTopMissingTable(filtered.map(s=>({...s,class:label})), key)}`;
-
-  document.getElementById(contentId).innerHTML = htmlStats + htmlChart + htmlTable;
-
-  // Compare nb vs ex
+  document.getElementById(`${key}-content`).innerHTML = statsHtml + chartHtml + tableHtml;
   if (charts[`${key}-compare`]) charts[`${key}-compare`].destroy();
-  charts[`${key}-compare`] = new Chart(document.getElementById(`chart-${key}-compare`), {
-    type: 'bar',
-    data: {
-      labels: ['หนังสือ', 'แบบฝึกหัด'],
-      datasets: [
-        { label: 'ส่งแล้ว', data: [
-          d.students.reduce((a,x)=>a+x.nbSubmitted,0),
-          d.students.reduce((a,x)=>a+x.exSubmitted,0)
-        ], backgroundColor: '#34c78a', borderRadius: 4 },
-        { label: 'ขาดส่ง', data: [
-          d.students.reduce((a,x)=>a+x.nbMissing,0),
-          d.students.reduce((a,x)=>a+x.exMissing,0)
-        ], backgroundColor: '#f25c7a', borderRadius: 4 },
+  charts[`${key}-compare`] = new Chart(document.getElementById(`chart-${key}-compare`),{
+    type:'bar',
+    data:{
+      labels:['หนังสือ','แบบฝึกหัด'],
+      datasets:[
+        {label:'ส่งแล้ว',data:[d.students.reduce((a,x)=>a+x.nbSubmitted,0),d.students.reduce((a,x)=>a+x.exSubmitted,0)],backgroundColor:'#1D9E75',borderRadius:5},
+        {label:'ขาดส่ง',data:[d.students.reduce((a,x)=>a+x.nbMissing,0),d.students.reduce((a,x)=>a+x.exMissing,0)],backgroundColor:'#E24B4A',borderRadius:5}
       ]
     },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: { beginAtZero: true, ticks: { color: '#555a72' }, grid: { color: 'rgba(255,255,255,0.04)' } },
-        x: { ticks: { color: '#8b90a7' }, grid: { display: false } }
-      }
-    }
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{color:'#8B90A7'},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{color:'#555',font:{size:14,family:'Sarabun'}},grid:{display:false}}}}
   });
+}
+
+function buildStudentList(key, d, label) {
+  if (!d) return '';
+  const q = (searchQuery[key]||'').toLowerCase();
+  let list = d.students.map(s=>({...s, class:label}));
+  if (currentFilter[key]==='missing') list = list.filter(s=>s.missing>0);
+  if (currentFilter[key]==='ok') list = list.filter(s=>s.missing===0);
+  if (q) list = list.filter(s=>s.name.toLowerCase().includes(q)||s.fullName.toLowerCase().includes(q));
+  if (!list.length) return '<div class="empty-state">ไม่พบนักเรียน</div>';
+  return list.map(s=>renderStudentRow(s, false)).join('');
+}
+
+function onSearch(key, val) {
+  searchQuery[key] = val;
+  const d = data[key];
+  const label = key==='p4'?'ป.4':'ป.6';
+  const el = document.getElementById(`list-${key}`);
+  if (el) el.innerHTML = buildStudentList(key, d, label);
 }
 
 function setFilter(key, filter) {
   currentFilter[key] = filter;
-  renderClass(key, data[key], key === 'p4' ? 'ป.4' : 'ป.6');
+  renderClass(key, data[key], key==='p4'?'ป.4':'ป.6');
 }
 
-// ── MODAL ──────────────────────────────────────────────────
 function openModal(fullName, cls) {
-  const d = cls === 'ป.4' ? data.p4 : data.p6;
-  const student = d.students.find(s => s.fullName === fullName);
+  const d = cls==='ป.4'?data.p4:data.p6;
+  const student = d.students.find(s=>s.fullName===fullName);
   if (!student) return;
-
+  const pct = student.total?Math.round(student.submitted/student.total*100):0;
+  const nbMissing = student.missingList.filter(x=>x.type==='nb');
+  const exMissing = student.missingList.filter(x=>x.type==='ex');
   document.getElementById('modal-name').textContent = student.fullName;
-  document.getElementById('modal-meta').textContent = `${cls} · เลขที่ ${student.num} · ${student.submitted}/${student.total} ชิ้น`;
-
-  const pct = student.total ? Math.round(student.submitted / student.total * 100) : 0;
-
-  const nbMissing = student.missingList.filter(x => x.type === 'nb');
-  const exMissing = student.missingList.filter(x => x.type === 'ex');
-
-  const body = `
+  document.getElementById('modal-meta').textContent = `${cls} · เลขที่ ${student.num} · ส่งแล้ว ${student.submitted} จาก ${student.total} ชิ้น`;
+  document.getElementById('modal-body').innerHTML = `
     <div class="modal-stats">
-      <div class="modal-stat">
-        <div class="modal-stat-val" style="color:var(--green)">${student.submitted}</div>
-        <div class="modal-stat-label">ส่งแล้ว</div>
-      </div>
-      <div class="modal-stat">
-        <div class="modal-stat-val" style="color:var(--red)">${student.missing}</div>
-        <div class="modal-stat-label">ขาดส่ง</div>
-      </div>
-      <div class="modal-stat">
-        <div class="modal-stat-val" style="color:${pct>=80?'var(--green)':pct>=50?'var(--amber)':'var(--red)'}">${pct}%</div>
-        <div class="modal-stat-label">ความคืบหน้า</div>
-      </div>
+      <div class="modal-stat"><div class="modal-stat-val" style="color:#1D9E75">${student.submitted}</div><div class="modal-stat-label">ส่งแล้ว</div></div>
+      <div class="modal-stat"><div class="modal-stat-val" style="color:#E24B4A">${student.missing}</div><div class="modal-stat-label">ขาดส่ง</div></div>
+      <div class="modal-stat"><div class="modal-stat-val" style="color:${progressColor(pct)}">${pct}%</div><div class="modal-stat-label">ความคืบหน้า</div></div>
     </div>
-
-    <div style="margin-bottom:20px">
-      <div class="progress-bar" style="height:8px">
-        <div class="progress-fill" style="width:${pct}%;background:${pct>=80?'var(--green)':pct>=50?'var(--amber)':'var(--red)'}"></div>
-      </div>
-    </div>
-
-    ${student.missing === 0 ? `
-      <div style="text-align:center;padding:24px;color:var(--green);font-size:15px">
-        ✓ ส่งงานครบทุกชิ้น
-      </div>
-    ` : `
-      ${nbMissing.length ? `
+    <div class="modal-progress" style="margin-bottom:20px"><div class="modal-progress-fill" style="width:${pct}%;background:${progressColor(pct)}"></div></div>
+    ${student.missing===0
+      ? '<div class="all-done">✓ ส่งงานครบทุกชิ้น</div>'
+      : `${nbMissing.length?`
         <div class="missing-section">
-          <div class="missing-title"><span class="missing-dot amber"></span>หนังสือที่ยังไม่ส่ง (${nbMissing.length} ครั้ง)</div>
-          <div class="missing-list">
-            ${nbMissing.map(x => `<div class="missing-item nb">${x.name}</div>`).join('')}
-          </div>
+          <div class="missing-section-title"><span class="missing-dot" style="background:#F5A623"></span>หนังสือที่ยังไม่ส่ง (${nbMissing.length} ครั้ง)</div>
+          <div class="missing-items">${nbMissing.map(x=>`<div class="missing-item nb">${x.name}</div>`).join('')}</div>
         </div>` : ''}
-      ${exMissing.length ? `
+        ${exMissing.length?`
         <div class="missing-section">
-          <div class="missing-title"><span class="missing-dot red"></span>แบบฝึกหัดที่ยังไม่ส่ง (${exMissing.length} ครั้ง)</div>
-          <div class="missing-list">
-            ${exMissing.map(x => `<div class="missing-item ex">${x.name}</div>`).join('')}
-          </div>
-        </div>` : ''}
-    `}
-  `;
-
-  document.getElementById('modal-body').innerHTML = body;
+          <div class="missing-section-title"><span class="missing-dot" style="background:#E24B4A"></span>แบบฝึกหัดที่ยังไม่ส่ง (${exMissing.length} ครั้ง)</div>
+          <div class="missing-items">${exMissing.map(x=>`<div class="missing-item ex">${x.name}</div>`).join('')}</div>
+        </div>` : ''}`}`;
   document.getElementById('overlay').classList.add('open');
 }
 
 function closeModal(e) {
-  if (!e || e.target === document.getElementById('overlay')) {
+  if (!e||e.target===document.getElementById('overlay')) {
     document.getElementById('overlay').classList.remove('open');
   }
 }
 
-// ── TABS ──────────────────────────────────────────────────
 function switchTab(tab) {
-  document.querySelectorAll('.tab').forEach((t,i) => {
-    const tabs = ['overview','p4','p6'];
-    t.classList.toggle('active', tabs[i] === tab);
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    t.classList.toggle('active',['overview','p4','p6'][i]===tab);
   });
-  document.querySelectorAll('.panel').forEach(p => {
-    p.classList.toggle('active', p.id === `panel-${tab}`);
+  document.querySelectorAll('.panel').forEach(p=>{
+    p.classList.toggle('active',p.id===`panel-${tab}`);
   });
 }
 
-// ── INIT ──────────────────────────────────────────────────
 loadData();
 </script>
 </body>
