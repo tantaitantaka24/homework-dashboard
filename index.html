@@ -700,11 +700,6 @@ function renderOverview() {
       </div>
     </div>
 
-    <div class="section-title">นักเรียนที่ต้องติดตามงาน (ทุกห้อง)</div>
-    ${renderTopMissingTable([...data.p4.students.map(s=>({...s,class:'ป.4'})), ...data.p6.students.map(s=>({...s,class:'ป.6'}))]
-      .filter(s => s.missing > 0)
-      .sort((a,b) => b.missing - a.missing)
-      .slice(0, 10), 'overview')}
   `;
 
   document.getElementById('overview-content').innerHTML = html;
