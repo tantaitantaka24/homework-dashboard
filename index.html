@@ -343,7 +343,7 @@ function renderOverview() {
             <span class="compare-pct">${data.p4.nbCount?Math.round(data.p4.students.reduce((a,x)=>a+x.nbSubmitted,0)/data.p4.students.length/data.p4.nbCount*100):0}%</span>
           </div>
           <div class="compare-row">
-            <span class="compare-label" style="width:80px;font-size:13px">ฝึกหัด ป.4</span>
+            <span class="compare-label" style="width:80px;font-size:13px">แบบฝึกหัด ป.4</span>
             <div class="compare-bar-wrap"><div class="compare-bar-fill" style="width:${data.p4.exCount?Math.round(data.p4.students.reduce((a,x)=>a+x.exSubmitted,0)/data.p4.students.length/data.p4.exCount*100):0}%;background:#E24B4A"></div></div>
             <span class="compare-pct">${data.p4.exCount?Math.round(data.p4.students.reduce((a,x)=>a+x.exSubmitted,0)/data.p4.students.length/data.p4.exCount*100):0}%</span>
           </div>
