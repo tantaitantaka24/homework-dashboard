@@ -33,7 +33,7 @@ body{font-family:'Sarabun',sans-serif;background:#F5F6FA;color:#1a1d2e;font-size
 .stat-card.green{border-top-color:#1D9E75}
 .stat-card.red{border-top-color:#E24B4A}
 .stat-card.amber{border-top-color:#F5A623}
-.stat-label{font-size:13px;color:#8B90A7;margin-bottom:6px;font-weight:500}
+.stat-label{font-size:15px;color:#8B90A7;margin-bottom:6px;font-weight:500}
 .stat-value{font-size:28px;font-weight:600;line-height:1.1}
 .stat-card.blue .stat-value{color:#378ADD}
 .stat-card.green .stat-value{color:#1D9E75}
@@ -374,7 +374,7 @@ function renderClass(key, d, label) {
   const statsHtml = `
     <div class="stats">
       <div class="stat-card blue"><div class="stat-label">นักเรียน</div><div class="stat-value">${s.count}</div><div class="stat-sub">คน</div></div>
-      <div class="stat-card green"><div class="stat-label">อัตราส่งงาน</div><div class="stat-value">${s.rate}%</div><div class="stat-sub">${s.totalSubmitted}/${s.totalSlots} ชิ้น</div></div>
+      <div class="stat-card green"><div class="stat-label">อัตราส่งงาน</div><div class="stat-value">${s.rate}%</div></div>
       <div class="stat-card amber"><div class="stat-label">งานทั้งหมด</div><div class="stat-value">${s.total}</div><div class="stat-sub">หนังสือ ${d.nbCount} + ฝึกหัด ${d.exCount}</div></div>
       <div class="stat-card red"><div class="stat-label">มีงานค้าง</div><div class="stat-value">${s.hasMissing}</div><div class="stat-sub">จาก ${s.count} คน</div></div>
     </div>`;
